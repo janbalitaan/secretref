@@ -6,6 +6,8 @@ caller is listed under **Changed** with what to do about it.
 
 ## [Unreleased]
 
+## [0.1.1] — 2026-10-26
+
 ### Added
 
 - `Rules`, which makes what the audit looks for adjustable at runtime. The
@@ -71,5 +73,6 @@ First release.
 - JSON support with no dependencies; YAML through the `yaml` extra.
 - Python 3.10 and newer. Fully typed, with `py.typed`.
 
-[Unreleased]: https://github.com/janbalitaan/secretref/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/janbalitaan/secretref/compare/v0.1.1...HEAD
+[0.1.1]: https://github.com/janbalitaan/secretref/releases/tag/v0.1.1
 [0.1.0]: https://github.com/janbalitaan/secretref/releases/tag/v0.1.0

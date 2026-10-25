@@ -1,6 +1,6 @@
 [project]
 name = "secretref"
-version = "0.1.0"
+version = "0.1.1"
 description = "Config files that name their secrets instead of containing them, with an audit that refuses a literal inside a repository"
 readme = "README.md"
 requires-python = ">=3.10"

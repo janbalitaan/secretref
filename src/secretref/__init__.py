@@ -91,7 +91,7 @@ __all__ = [
     "loads",
     "repository_root",
 ]
-__version__ = "0.1.0"
+__version__ = "0.1.1"
 
 # The public API stays functions, because `load("config.json")` is what a
 # caller wants to write. Config holds the implementation, so the pieces live
