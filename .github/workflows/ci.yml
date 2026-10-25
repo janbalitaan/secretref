@@ -1,0 +1,25 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+# A burst of commits otherwise queues a full matrix per commit for results
+# nobody reads. The group key depends on the repository, which is why this
+# lives here rather than in the template.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  ci:
+    uses: janbalitaan/pipeline-templates/.github/workflows/python-ci.yml@main
+    with:
+      # Install the optional extras, so the YAML parser is exercised rather
+      # than skipped. A test that only ever skips in CI is not a test.
+      sync-args: --all-extras

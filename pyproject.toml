@@ -1,0 +1,115 @@
+[project]
+name = "secretref"
+version = "0.1.0"
+description = "Config files that name their secrets instead of containing them, with an audit that refuses a literal inside a repository"
+readme = "README.md"
+requires-python = ">=3.10"
+license = "MIT"
+license-files = ["LICENSE"]
+authors = [{ name = "janbalitaan" }]
+keywords = ["config", "configuration", "secrets", "credentials", "env",
+            "dotenv", "settings", "security", "json", "yaml"]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Intended Audience :: Developers",
+  "Operating System :: OS Independent",
+  "Intended Audience :: System Administrators",
+  "License :: OSI Approved :: MIT License",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Topic :: Security",
+  "Topic :: Software Development :: Libraries",
+  "Topic :: System :: Systems Administration",
+  "Environment :: Console",
+  "Topic :: Utilities",
+  "Typing :: Typed",
+]
+# No dependencies. A library that reads your secrets should be auditable in
+# an afternoon, and every dependency is something else to audit.
+dependencies = []
+
+[project.optional-dependencies]
+# For projects that already model their config with pydantic.
+pydantic = ["pydantic>=2.9"]
+# For config files written as YAML rather than JSON.
+yaml = ["pyyaml>=6.0"]
+
+[project.scripts]
+secretref = "secretref.cli:run"
+
+[project.urls]
+Homepage = "https://github.com/janbalitaan/secretref"
+Documentation = "https://github.com/janbalitaan/secretref/blob/main/docs/README.md"
+Source = "https://github.com/janbalitaan/secretref"
+Changelog = "https://github.com/janbalitaan/secretref/blob/main/CHANGELOG.md"
+Issues = "https://github.com/janbalitaan/secretref/issues"
+
+[build-system]
+requires = ["uv_build>=0.5"]
+build-backend = "uv_build"
+
+[tool.uv.build-backend]
+module-root = "src"
+
+[dependency-groups]
+dev = ["pytest>=8.3", "pytest-cov>=6.0", "complexipy>=8.1", "ruff>=0.8", "ty>=0.0.1a1"]
+
+[tool.ruff]
+line-length = 96
+target-version = "py310"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "W", "F", "I", "N", "UP", "B", "A", "C4", "SIM", "TID", "PTH",
+          "RET", "ARG", "PL", "RUF", "S", "D"]
+ignore = ["D107", "D203", "D213"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["S", "PLR2004", "ARG", "D"]
+# A command object taking one keyword per command-line flag is clearer than
+# one taking an options bag, and the argument-count rule cannot tell them
+# apart.
+"src/secretref/cli/audit_command.py" = ["PLR0913"]
+
+# A module named json.py or yaml.py works, because Python resolves imports
+# absolutely — but a reader seeing `import json` inside json.py has to stop
+# and work out which one they are getting. Comparing names rather than full
+# paths makes the linter refuse that, so the choice does not depend on anyone
+# remembering it.
+[tool.ruff.lint.flake8-builtins]
+strict-checking = true
+
+[tool.ruff.lint.flake8-tidy-imports]
+ban-relative-imports = "all"
+
+[tool.ruff.lint.pydocstyle]
+convention = "pep257"
+
+[tool.ruff.lint.isort]
+known-first-party = ["secretref"]
+force-sort-within-sections = true
+
+# PyYAML is an optional extra, so whether this import resolves depends on how
+# the project was synced. An inline suppression cannot cover both cases:
+# without the extra it is needed, with it, it is an unused suppression.
+[[tool.ty.overrides]]
+include = ["src/secretref/parsers/yaml_parser.py"]
+
+[tool.ty.overrides.rules]
+unresolved-import = "ignore"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+addopts = "-q --strict-markers"
+
+[tool.coverage.run]
+source = ["src/secretref"]
+branch = true
+# Runs at import, so it only executes in the subprocess that tests
+# `python -m secretref` — where this process cannot measure it. The test
+# asserting it works is in tests/cli/test_entry_points.py.
+omit = ["src/secretref/__main__.py"]
