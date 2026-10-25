@@ -3,9 +3,9 @@
 Config files that name their secrets instead of containing them.
 
 [![PyPI](https://img.shields.io/pypi/v/secretref)](https://pypi.org/project/secretref/)
-[![Python](https://img.shields.io/pypi/pyversions/secretref)](https://pypi.org/project/secretref/)
+[![Python](https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%203.12%20%7C%203.13-blue)](https://github.com/janbalitaan/secretref/blob/main/pyproject.toml)
 [![CI](https://github.com/janbalitaan/secretref/actions/workflows/ci.yml/badge.svg)](https://github.com/janbalitaan/secretref/actions/workflows/ci.yml)
-[![License](https://img.shields.io/pypi/l/secretref)](https://github.com/janbalitaan/secretref/blob/main/LICENSE)
+[![License](https://img.shields.io/badge/license-MIT-green)](https://github.com/janbalitaan/secretref/blob/main/LICENSE)
 
 ```json
 {
@@ -57,6 +57,17 @@ number, a list of feature flags, and nested sections — the three things that
 make `.env` start to hurt.
 
 That file is committable. It says where each secret lives, not what it is.
+
+## Examples
+
+Runnable files in [`examples/`](https://github.com/janbalitaan/secretref/blob/main/examples/README.md),
+each self-contained and printing what it did:
+
+```bash
+python examples/01_reading_a_config.py
+```
+
+Every one is run by the test suite, so an example that stops working fails CI.
 
 ## Documentation
 
