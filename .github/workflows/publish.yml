@@ -72,8 +72,16 @@ jobs:
       - name: Publish
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
-          # Empty means PyPI. A manual run defaults to TestPyPI so a mis-click
-          # rehearses rather than publishes.
+          # An empty url means PyPI; the TestPyPI url means TestPyPI.
+          #
+          # The condition names the TestPyPI case rather than the PyPI one,
+          # which is not arbitrary. `A && B || C` in an Actions expression is
+          # not a ternary: `&&` yields B when A is truthy, then `||` yields C
+          # when that result is *falsy* — and an empty string is falsy. So
+          # `isPyPI && '' || testUrl` yields the TestPyPI url even when
+          # isPyPI is true, and every release would publish to the wrong
+          # index. Keeping the non-empty value in the true branch avoids it.
           repository-url: >-
-            ${{ (github.event_name == 'release' || inputs.target == 'pypi')
-                && '' || 'https://test.pypi.org/legacy/' }}
+            ${{ (github.event_name == 'workflow_dispatch'
+                 && inputs.target == 'testpypi')
+                && 'https://test.pypi.org/legacy/' || '' }}
