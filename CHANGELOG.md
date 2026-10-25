@@ -6,6 +6,24 @@ caller is listed under **Changed** with what to do about it.
 
 ## [Unreleased]
 
+### Added
+
+- `Rules`, which makes what the audit looks for adjustable at runtime. The
+  credential formats, the key names that mean "credential", the placeholder
+  shapes, the repository markers and the minimum length were constants, so
+  changing one meant waiting for a release — and the realistic reasons to
+  change one are immediate: a vendor publishes a format nobody has covered, a
+  team names its keys something the rule does not recognize, a repository uses
+  a version control system this version has not heard of.
+  `audit(config, rules=...)`; the default is the shipped set, so adopting it
+  changes nothing.
+- `Repository.root(markers=..., max_parents=...)`, so the working-copy check
+  recognizes a version control system this release does not list. The
+  severity of a finding turns on it.
+- `docs/extending.md`, with a table of every constant and where to change it,
+  checked by `tests/docs/test_extensibility.py` rather than trusted.
+- `examples/06_extending.py`.
+
 ## [0.1.0] — 2026-10-26
 
 First release.

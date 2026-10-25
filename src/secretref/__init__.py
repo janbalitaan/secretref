@@ -59,6 +59,7 @@ from secretref.exceptions import (
 from secretref.models import (
     Config,
     Finding,
+    Rules,
     SecretRef,
     Severity,
     Source,
@@ -77,6 +78,7 @@ __all__ = [
     "Finding",
     "ResolutionCache",
     "ResolutionError",
+    "Rules",
     "SecretRef",
     "SecretrefError",
     "Severity",

@@ -14,6 +14,7 @@ python examples/01_reading_a_config.py
 | [`03_auditing_is_safe.py`](03_auditing_is_safe.py) | Why auditing a pull request runs none of its commands. |
 | [`04_policies.py`](04_policies.py) | Bounding what a config may reach, and the defaults. |
 | [`05_a_startup_check.py`](05_a_startup_check.py) | Failing a deployment rather than a request. |
+| [`06_extending.py`](06_extending.py) | Auditing for a format this version has never heard of. |
 
 Every file is run by the test suite, so an example that stops working fails
 CI rather than sitting here misleading someone.

@@ -25,18 +25,28 @@ class KnownFormat:
     FORMATS: ClassVar[tuple[tuple[str, re.Pattern[str]], ...]] = KNOWN_SECRET_FORMATS
 
     @classmethod
-    def identify(cls, value: str) -> str:
+    def identify(
+        cls,
+        value: str,
+        formats: tuple[tuple[str, re.Pattern[str]], ...] | None = None,
+    ) -> str:
         """Name the credential format this value matches, or return empty.
 
-        The first match wins. The patterns are specific enough that two
-        matching the same value would mean one of them is wrong.
+        The first match wins, which is why the order places narrower
+        patterns before wider ones. `formats` overrides the shipped list, for
+        a caller who has added a vendor or corrected one — see
+        `secretref.models.rules`.
         """
-        for name, pattern in cls.FORMATS:
+        for name, pattern in formats if formats is not None else cls.FORMATS:
             if pattern.search(value):
                 return name
         return ""
 
     @classmethod
-    def matches(cls, value: str) -> bool:
+    def matches(
+        cls,
+        value: str,
+        formats: tuple[tuple[str, re.Pattern[str]], ...] | None = None,
+    ) -> bool:
         """Whether this value matches any published credential format."""
-        return bool(cls.identify(value))
+        return bool(cls.identify(value, formats))

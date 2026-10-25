@@ -2,8 +2,12 @@
 
 from __future__ import annotations
 
+from pathlib import Path
+
 import pytest
 
+from secretref.constants import REPOSITORY_MARKERS
+from secretref.exceptions import ConfigError
 from secretref.utils import Repository
 from secretref.utils import repository as repository_module
 
@@ -46,3 +50,48 @@ class TestRepository:
         assert Repository.contains_marker(tmp_path) is False
         (tmp_path / ".git").mkdir()
         assert Repository.contains_marker(tmp_path) is True
+
+
+class TestTheWalkIsAdjustable:
+    """A version control system this release does not list should not mean
+    waiting for the next one. The severity of a finding turns on it: a
+    literal secret inside a working copy is one commit from a remote, and the
+    same value outside one is careless but contained.
+    """
+
+    def test_a_custom_marker_is_found(self, tmp_path):
+        (tmp_path / ".jj").mkdir()
+        nested = tmp_path / "deep" / "deeper"
+        nested.mkdir(parents=True)
+        assert Repository.root(nested, markers=(".jj",)) == tmp_path.resolve()
+
+    def test_the_shipped_markers_are_ignored_when_markers_are_given(self):
+        """Replaces rather than extends — spreading the tuple is how a caller
+        adds to it, and that distinction has to be real or the documentation
+        is wrong."""
+        assert Repository.root(Path(__file__), markers=(".nothing-here",)) is None
+
+    def test_spreading_the_shipped_tuple_keeps_them(self):
+        found = Repository.root(Path(__file__), markers=(*REPOSITORY_MARKERS, ".jj"))
+        assert found is not None
+
+    def test_the_walk_can_be_bounded_shorter(self):
+        """A bound of 1 checks only the starting directory."""
+        assert Repository.root(Path(__file__).parent, max_parents=1) is None
+
+    def test_a_bound_of_zero_is_refused(self):
+        with pytest.raises(ConfigError, match="at least 1"):
+            Repository.root(Path(__file__), max_parents=0)
+
+    def test_a_negative_bound_is_refused(self):
+        with pytest.raises(ConfigError):
+            Repository.root(Path(__file__), max_parents=-5)
+
+    def test_the_walk_stops_at_the_filesystem_root(self):
+        """Reaching `/` without a marker returns None rather than looping."""
+        assert Repository.root(Path("/"), markers=(".nothing-here",)) is None
+
+    def test_contains_marker_takes_markers_too(self, tmp_path):
+        (tmp_path / ".jj").mkdir()
+        assert Repository.contains_marker(tmp_path, markers=(".jj",))
+        assert not Repository.contains_marker(tmp_path)

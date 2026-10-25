@@ -9,7 +9,7 @@ from secretref import (
     # references
     SecretRef, Source,
     # auditing
-    audit, Finding, Severity,
+    audit, Finding, Severity, Rules,
     # policies
     CommandPolicy, FilePolicy, EnvironmentPolicy,
     # caching
@@ -138,14 +138,51 @@ elif not reference.is_resolvable():
 runs anything. `is_resolvable()` **does** resolve, so a command reference
 runs — which is why `audit()` does not call it by default.
 
-## `audit(config, *, resolve=False) -> list[Finding]`
+## `audit(config, *, resolve=False, rules=None) -> list[Finding]`
 
 ```python
 audit(config)                  # resolves nothing with side effects
 audit(config, resolve=True)    # also verifies each secret resolves
+audit(config, rules=my_rules)  # looks for what you tell it to
 ```
 
 See [auditing](auditing.md).
+
+## `Rules`
+
+What the audit looks for, as data you can change. Frozen; every adjustment
+returns a new set.
+
+```python
+from secretref import Rules
+
+rules = (
+    Rules.default()
+    .with_formats({"a Fastly API token": re.compile(r"...")})
+    .with_secret_keys(["access_pass", "signing_material"])
+    .with_placeholders([r"^__[A-Z_]+__$"])
+    .with_repository_markers((*REPOSITORY_MARKERS, ".jj"))
+    .with_minimum_length(12)
+)
+audit(config, rules=rules)
+```
+
+| Method | |
+| --- | --- |
+| `.with_formats(add, *, replace_named, without)` | credential formats |
+| `.with_secret_keys(names)` | key names that mean "credential" |
+| `.with_placeholders(patterns)` | shapes that mean "not filled in yet" |
+| `.with_repository_markers(markers)` | what counts as a working copy |
+| `.with_minimum_length(length)` | the bar for "too short to judge" |
+| `.describe()` | safe to log |
+
+Fields: `formats`, `secret_key`, `placeholders`, `repository_markers`,
+`min_secret_length`, `extra_key_names`.
+
+`with_formats` and `with_secret_keys` **extend** rather than replace, because
+a caller adding one name almost never means "and stop recognizing password".
+A name in `replace_named` or `without` that is not present raises, since the
+usual cause is a typo. See [extending](extending.md).
 
 ## `Finding`
 
@@ -266,6 +303,24 @@ except SecretrefError as error:
 REDACTED        # "[redacted]", what a value is replaced with
 __version__     # the installed version
 ```
+
+Every constant that affects a decision is reachable at runtime, so a value
+that is wrong for one codebase does not wait for a release:
+
+| Constant | Where to change it |
+| --- | --- |
+| `CONFIG_NAMES` | `load(names=...)`, or `Config.NAMES` on a subclass |
+| `KNOWN_SECRET_FORMATS` | `Rules.with_formats` |
+| `SECRET_KEY` | `Rules.with_secret_keys` |
+| `PLACEHOLDERS` | `Rules.with_placeholders` |
+| `MIN_SECRET_LENGTH` | `Rules.with_minimum_length` |
+| `REPOSITORY_MARKERS` | `Rules.with_repository_markers`, `Repository.root(markers=...)` |
+| `MAX_PARENTS_SEARCHED` | `Repository.root(max_parents=...)` |
+| `COMMAND_TIMEOUT_SECONDS` | `CommandPolicy.allow(timeout_seconds=...)` |
+| `MAX_COMMAND_OUTPUT_BYTES` | `CommandPolicy.allow(max_output_bytes=...)` |
+| `MINIMAL_ENVIRONMENT` | `CommandPolicy.allow(pass_environment=...)` |
+| `SECRET_MOUNTS` | `FilePolicy.restrict(roots=...)` |
+| `MAX_SECRET_FILE_BYTES` | `FilePolicy.restrict(max_bytes=...)` |
 
 ## Command line
 

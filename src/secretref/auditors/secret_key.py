@@ -14,7 +14,7 @@ class SecretKey:
     PATTERN: ClassVar[re.Pattern[str]] = SECRET_KEY
 
     @classmethod
-    def matches(cls, dotted: str) -> bool:
+    def matches(cls, dotted: str, pattern: re.Pattern[str] | None = None) -> bool:
         """Whether a path's final segment names a credential.
 
         Only the final segment, so "providers.0.api_key" is judged on
@@ -22,4 +22,4 @@ class SecretKey:
         whether this particular leaf holds a secret.
         """
         last = dotted.rsplit(".", 1)[-1]
-        return bool(cls.PATTERN.search(last))
+        return bool((pattern or cls.PATTERN).search(last))

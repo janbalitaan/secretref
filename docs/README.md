@@ -28,6 +28,7 @@ config.secret("database.password").resolve()
 | [Reference forms](reference-forms.md) | `env`, `file`, `command`, `literal` — and which to reach for. |
 | [Policies](policies.md) | Bounding what a config is allowed to reach. |
 | [Auditing](auditing.md) | Finding secrets that ended up inline, in code and in CI. |
+| [Extending](extending.md) | Changing a pattern, key name or marker without waiting for a release. |
 | [Caching](caching.md) | When resolution is expensive enough to cache. |
 | [Deployment](deployment.md) | Recipes for Docker, Kubernetes, systemd, serverless and a laptop. |
 | [API reference](api.md) | Every public name, with signatures. |

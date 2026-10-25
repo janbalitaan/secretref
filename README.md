@@ -79,6 +79,7 @@ Full documentation is in [`docs/`](https://github.com/janbalitaan/secretref/blob
 | [Reference forms](https://github.com/janbalitaan/secretref/blob/main/docs/reference-forms.md) | `env`, `file`, `command`, `literal` |
 | [Policies](https://github.com/janbalitaan/secretref/blob/main/docs/policies.md) | Bounding what a config may reach |
 | [Auditing](https://github.com/janbalitaan/secretref/blob/main/docs/auditing.md) | Finding secrets that ended up inline |
+| [Extending](https://github.com/janbalitaan/secretref/blob/main/docs/extending.md) | Changing a pattern, key name or marker without a release |
 | [Caching](https://github.com/janbalitaan/secretref/blob/main/docs/caching.md) | When resolution is expensive enough to cache |
 | [Deployment](https://github.com/janbalitaan/secretref/blob/main/docs/deployment.md) | Docker, Kubernetes, systemd, serverless, a laptop |
 | [API reference](https://github.com/janbalitaan/secretref/blob/main/docs/api.md) | Every public name |

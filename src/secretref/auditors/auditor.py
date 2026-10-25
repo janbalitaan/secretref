@@ -6,7 +6,9 @@ from secretref.auditors.known_format import KnownFormat
 from secretref.auditors.placeholder import Placeholder
 from secretref.auditors.secret_key import SecretKey
 from secretref.models.config import Config
-from secretref.models.finding import Finding, Severity
+from secretref.models.finding import Finding
+from secretref.models.rules import Rules
+from secretref.models.severity import Severity
 from secretref.models.source import Source
 from secretref.utils.repository import Repository
 from secretref.utils.tree import Tree
@@ -19,7 +21,9 @@ class Auditor:
     arguments made the functions longer than the checks they performed.
     """
 
-    def __init__(self, config: Config, *, resolve: bool = False) -> None:
+    def __init__(
+        self, config: Config, *, resolve: bool = False, rules: Rules | None = None
+    ) -> None:
         """Audit a config, optionally checking that its secrets resolve.
 
         `resolve` is off by default, and that default is a security
@@ -34,7 +38,12 @@ class Auditor:
         """
         self._config = config
         self._resolve = resolve
-        self._repository = Repository.root(config.path) if config.path else None
+        self._rules = rules or Rules.default()
+        self._repository = (
+            Repository.root(config.path, self._rules.repository_markers)
+            if config.path
+            else None
+        )
 
     def run(self) -> list[Finding]:
         """Run every check and order the results by severity."""
@@ -121,18 +130,20 @@ class Auditor:
         """
         findings = []
         for path, value in Tree.strings(self._config.data):
-            if identified := KnownFormat.identify(value):
+            if identified := KnownFormat.identify(value, self._rules.formats):
                 findings.append(self._known_format_finding(path, identified))
             elif self._looks_like_a_secret(path, value):
                 findings.append(self._literal_finding(path, value))
         return findings
 
-    @staticmethod
-    def _looks_like_a_secret(path: str, value: str) -> bool:
+    def _looks_like_a_secret(self, path: str, value: str) -> bool:
         """Whether a key name suggests a credential and the value could be one."""
-        if not SecretKey.matches(path):
+        if not SecretKey.matches(path, self._rules.secret_key):
             return False
-        return not (Placeholder.too_short_to_judge(value) or Placeholder.matches(value))
+        return not (
+            Placeholder.too_short_to_judge(value, self._rules.min_secret_length)
+            or Placeholder.matches(value, self._rules.placeholders)
+        )
 
     def _known_format_finding(self, path: str, identified: str) -> Finding:
         """One credential matching a published format.
@@ -159,7 +170,7 @@ class Auditor:
 
     def _literal_finding(self, path: str, value: str) -> Finding:
         """One literal, with a severity that depends on the repository."""
-        if Placeholder.is_noise(value):
+        if Placeholder.is_noise(value, self._rules.placeholders, self._rules.min_secret_length):
             return Finding(
                 severity=Severity.NOTE,
                 path=path,

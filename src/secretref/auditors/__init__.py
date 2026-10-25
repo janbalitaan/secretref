@@ -26,6 +26,7 @@ from secretref.auditors.placeholder import Placeholder
 from secretref.auditors.secret_key import SecretKey
 from secretref.models.config import Config
 from secretref.models.finding import Finding
+from secretref.models.rules import Rules
 from secretref.utils.repository import Repository
 
 __all__ = [
@@ -37,7 +38,9 @@ __all__ = [
 ]
 
 
-def audit(config: Config, *, resolve: bool = False) -> list[Finding]:
+def audit(
+    config: Config, *, resolve: bool = False, rules: Rules | None = None
+) -> list[Finding]:
     """Every problem in a config file, most severe first.
 
     Does not resolve by default, which is a security boundary rather than a
@@ -47,8 +50,12 @@ def audit(config: Config, *, resolve: bool = False) -> list[Finding]:
 
     Pass `resolve=True` for your own config at startup, where confirming
     that a secret is actually reachable is worth more than the caution.
+
+    `rules` adjusts what is looked for — a credential format this version
+    does not know, a key name your team uses, a placeholder convention of
+    your own. See `secretref.models.rules`; the default is the shipped set.
     """
-    return Auditor(config, resolve=resolve).run()
+    return Auditor(config, resolve=resolve, rules=rules).run()
 
 
 # `repository_root` was the audit's own helper before the VCS walk was

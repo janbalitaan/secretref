@@ -9,12 +9,14 @@ one way.
 from secretref.models.config import Config
 from secretref.models.finding import Finding
 from secretref.models.reference import SecretRef
+from secretref.models.rules import Rules
 from secretref.models.severity import Severity
 from secretref.models.source import Source
 
 __all__ = [
     "Config",
     "Finding",
+    "Rules",
     "SecretRef",
     "Severity",
     "Source",
